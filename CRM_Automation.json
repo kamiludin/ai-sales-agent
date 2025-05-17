@@ -1,0 +1,594 @@
+{
+  "name": "CRM Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "AK3EzjNC"
+      },
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -180,
+        -220
+      ],
+      "id": "c554d5ba-e4bc-4c71-940c-7df6913dd3a4",
+      "name": "Typeform Trigger",
+      "webhookId": "2e2eba1a-8f7f-4c58-9afd-e05133d59c18",
+      "credentials": {
+        "typeformApi": {
+          "id": "4FGebfKI7KR6cjHT",
+          "name": "Typeform account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.Company }}'s official main company Website URL\",\n  \"topic\": \"general\",\n  \"search_depth\": \"advanced\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 1,\n  \"time_range\": null,\n  \"days\": 7,\n  \"include_answer\": true,\n  \"include_raw_content\": false,\n  \"include_images\": false,\n  \"include_image_descriptions\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": []\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -220
+      ],
+      "id": "45dc26dc-36d5-4bc6-9218-355a13a5268a",
+      "name": "Find Website URL"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $('Typeform Trigger').item.json.Company }}'s company linkedin URL'\",\n  \"topic\": \"general\",\n  \"search_depth\": \"basic\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 1,\n  \"time_range\": null,\n  \"days\": 7,\n  \"include_answer\": true,\n  \"include_raw_content\": false,\n  \"include_images\": false,\n  \"include_image_descriptions\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": []\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -420
+      ],
+      "id": "dc63bf64-8af3-4ade-8b61-cbe85ed3ac2f",
+      "name": "Find Linkedin URL"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appCTHz3LrAdFvj2U",
+          "mode": "list",
+          "cachedResultName": "CRM Base",
+          "cachedResultUrl": "https://airtable.com/appCTHz3LrAdFvj2U"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblozp9Fnl55xpscu",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appCTHz3LrAdFvj2U/tblozp9Fnl55xpscu"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First name": "={{ $('Leads Data').item.json['First name'] }}",
+            "Last name": "={{ $('Leads Data').item.json['Last name'] }}",
+            "Email": "={{ $('Leads Data').item.json.Email }}",
+            "Company": "={{ $('Leads Data').item.json.Company }}",
+            "Website URL": "={{ $('Leads Data').item.json['Website URL'] }}",
+            "Linkedin URL": "={{ $('Leads Data').item.json['Linkedin URL'] }}",
+            "Company Type": "={{ $('Leads Data').item.json['Company Type'] }}",
+            "Content Focus": "={{ $('Leads Data').item.json['Content Focus'] }}",
+            "Target Audience": "={{ $('Leads Data').item.json['Target Audience'] }}",
+            "Current Need": "={{ $('Leads Data').item.json['Current Need'] }}",
+            "Campaign Timeline": "={{ $('Leads Data').item.json['Campaign Timeline'] }}",
+            "Monthly Budget (USD)": "={{ $('Leads Data').item.json['Monthly Budget (USD)'] }}",
+            "Additional Notes": "={{ $('Leads Data').item.json['Additional Notes'] }}",
+            "Status": "={{ $json.output.Status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First name",
+              "displayName": "First name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last name",
+              "displayName": "Last name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Website URL",
+              "displayName": "Website URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linkedin URL",
+              "displayName": "Linkedin URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company Type",
+              "displayName": "Company Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Content Focus",
+              "displayName": "Content Focus",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Target Audience",
+              "displayName": "Target Audience",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Current Need",
+              "displayName": "Current Need",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Campaign Timeline",
+              "displayName": "Campaign Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monthly Budget (USD)",
+              "displayName": "Monthly Budget (USD)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Notes",
+              "displayName": "Additional Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created Time",
+              "displayName": "Created Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        780,
+        -220
+      ],
+      "id": "da9eab7a-964f-4265-9e08-b9641a59a175",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "TMqEOmdo5ThT93nK",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Campaign Timeline: {{ $json['Campaign Timeline'] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI Sales Assistant working for a creative agency in the Sports and Football Content industry.\nYour task is to classify incoming leads based on their response : {{ $json['Campaign Timeline'] }}\n\nUse the following rules to assign the lead status:\n- If the answer is \"Immediately\", classify as \"Hot\"\n- If the answer is \"Within 1–2 weeks\", classify as \"Hot\"\n- If the answer is \"This month\", classify as \"Warm\"\n- If the answer is \"Not sure yet\", classify as \"Cold\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        440,
+        -220
+      ],
+      "id": "6ae7e5e4-fb53-4c65-bf84-cbea04273652",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "23632304-0bdb-492d-a874-fc390b4ed17e",
+              "name": "First name",
+              "value": "={{ $('Typeform Trigger').item.json['First name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "5958ff1d-965c-4557-8206-ce444305f25d",
+              "name": "Last name",
+              "value": "={{ $('Typeform Trigger').item.json['Last name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "c5faf41f-c404-47e2-bb73-b95409aa6b3f",
+              "name": "Email",
+              "value": "={{ $('Typeform Trigger').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "1f4c46b8-ecfa-4c7b-9291-e79ce58f83f0",
+              "name": "Company",
+              "value": "={{ $('Typeform Trigger').item.json.Company }}",
+              "type": "string"
+            },
+            {
+              "id": "0cd50125-5a88-44a5-a785-acdeae625b7f",
+              "name": "Website URL",
+              "value": "={{ $('Find Website URL').item.json.results[0].url }}",
+              "type": "string"
+            },
+            {
+              "id": "fcef9f37-3470-4086-adc0-f407a937e792",
+              "name": "Linkedin URL",
+              "value": "={{ $json.results[0].url }}",
+              "type": "string"
+            },
+            {
+              "id": "9cefeac4-53ea-45a3-9c5d-5634a13e0cbb",
+              "name": "Company Type",
+              "value": "={{ $('Typeform Trigger').item.json['Which describes you best?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "fdc52168-20fb-46cc-9585-9211dd2a5917",
+              "name": "Content Focus",
+              "value": "={{ $('Typeform Trigger').item.json['Which kind of football content are you focused on?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "87aa5274-4b70-426e-90d8-f9e1374395ea",
+              "name": "Target Audience",
+              "value": "={{ $('Typeform Trigger').item.json['Who are your main audience targets?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "13ad623e-aa54-4b3b-9df0-f4b0b0cc2b2f",
+              "name": "Current Need",
+              "value": "={{ $('Typeform Trigger').item.json['What do you need help with most right now?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "199971ec-e60f-4a7b-af5b-51e3498c81bc",
+              "name": "Campaign Timeline",
+              "value": "={{ $('Typeform Trigger').item.json['When do you plan to start your next content campaign?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "265fa343-6068-4079-97e0-3079f6ca82f5",
+              "name": "Monthly Budget (USD)",
+              "value": "={{ $('Typeform Trigger').item.json['What is your current monthly content budget? (USD)'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ed014fbc-0b84-44a8-804e-8b1763539ceb",
+              "name": "Additional Notes",
+              "value": "={{ $('Typeform Trigger').item.json['Tell us anything else you\\'d like us to know (optional)'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        -220
+      ],
+      "id": "d8175279-f32d-41ee-8cf6-0e608674a1e8",
+      "name": "Leads Data"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C08SF8NTQAU",
+          "mode": "list",
+          "cachedResultName": "new-leads"
+        },
+        "text": "A new lead just filled out the form",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        980,
+        -220
+      ],
+      "id": "968ed82b-cc9e-4edb-a818-1c67033933ee",
+      "name": "Slack",
+      "webhookId": "1b6cab71-3b0f-4836-b59f-ec13dda4005e",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "HkIWMRWGzv0ZZqiQ",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        0
+      ],
+      "id": "f1b2a30b-db27-4bc7-9092-40f2a45f9ab4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "AbmkfdOQlblYL0w6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{  \n  \"Status\": \"Example\"  \n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        0
+      ],
+      "id": "0040518d-20bd-4cb3-b8bc-f9d98bf2a13a",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Typeform Trigger": {
+      "main": [
+        [
+          {
+            "node": "Find Website URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Website URL": {
+      "main": [
+        [
+          {
+            "node": "Find Linkedin URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Linkedin URL": {
+      "main": [
+        [
+          {
+            "node": "Leads Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leads Data": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d4757be7-a3d8-49be-96a9-5f9ae2e73a95",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1f679df01e7b48a7e705d738e81949fa963e9bde114f71c165ef28853d37dd6f"
+  },
+  "id": "OD37ot5h5qZMrkot",
+  "tags": []
+}

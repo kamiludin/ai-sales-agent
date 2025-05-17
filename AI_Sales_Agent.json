@@ -1,0 +1,434 @@
+{
+  "name": "AI Sales Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.fields.Status }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=✅ Step 1: Retrieve Lead Data (from Airtable Trigger)\nUse the incoming data directly from the Airtable Trigger — no additional lookup is needed.\n\nRequired fields:\n\n{{ $json.fields['First name'] }} — to personalize the greeting in the email.\n\n{{ $json.fields.Email }} — the recipient’s address.\n\n{{ $json.fields.Status }} — determines the lead’s qualification (Cold, Warm, or Hot).\n\nThis step is crucial as it dictates the logic for the next steps.\n\n\n✅ Step 2: Retrieve Agency Profile (Google Docs)\nUse the Google Docs tool to access GOALFRAME’s agency profile, which includes:\n\nService descriptions\n\nClient testimonials\n\nPortfolio or campaign examples\n\nDiscounts or offers (Note: maximum 40% discount allowed for Hot leads only)\n\nThis content will be used to enrich and personalize the email based on lead status.\n\n\n✅ Step 3: Generate Personalized Email Based on {{ $json.fields.Status }}\nUse {{ $json.fields.Status }} to determine the tone and content of the follow-up email:\n\n- Cold:\n\nSend an educational and value-driven email.\n\nUse the agency profile to share insights, football content trends, or relevant portfolio (with the link URL).\n\nDo not include any sales language or discount. Focus on building awareness and trust.\n\n- Warm:\n\nSend a credibility-focused and engaging email.\n\nInclude client testimonials, campaign previews, or strategic content.\n\nInclude a soft CTA such as \"Would you like to explore this together?\" or \"Let us know if you'd like to schedule a call.\"\n\n- Hot:\n\nSend a persuasive, action-oriented email.\n\nInclude an exclusive discount (maximum 40%) only if relevant.\n\nEmphasize urgency: limited slots, first-come-first-served, early access.\n\nAdd a strong CTA: \"Schedule a kickoff call,\" \"Claim your discount,\" or \"Sign the proposal.\"\n\n\n✅ Step 4: Send Email to Slack for Approval\nOutput the email content and pass it to Slack for manual review and approval before sending.\n\n⚠️ Do not mention lead status (Cold, Warm, Hot) in the email content. For example : As Cold Leads, As Warm Leads, As Hot Leads. Don't use this.\nUse the lead status only to determine the tone, structure, and level of persuasion of the email.\nThe recipient should never know their internal classification.\n\n✳️ Important Formatting Rule:\nWhen generating the email, do not use Markdown syntax such as **bold**, *italic*, # headings, or :emoji:.\n\nOutput the email as plain text only using standard capitalization, bullet points, and paragraph spacing.\nUse hyphens (-) for bullet points, and avoid symbols like **, _, or special emojis.\n\nFormat the email cleanly for Gmail preview and sending — no code-like or forum-style formatting."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -80,
+        -40
+      ],
+      "id": "1a30161d-5f80-4964-a308-2400de3badc0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1Er4A0zeyAAXkkPIJpuad6lUNoDOIn7GnTXNrvTUi1qk/edit?usp=sharing",
+        "simple": false
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        0,
+        240
+      ],
+      "id": "5f156d79-2ce4-4608-ba3b-da574eb7fd3a",
+      "name": "Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "MEmNqst2KjOF8PsQ",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C08SF8NTQAU",
+          "mode": "list",
+          "cachedResultName": "new-leads"
+        },
+        "message": "=Subject : {{ $json.Subject }}\n\nBody : {{ $json.Body }}",
+        "responseType": "freeText",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        500,
+        -40
+      ],
+      "id": "b005abbe-05e7-4830-90a6-953f1322e8d7",
+      "name": "Slack",
+      "webhookId": "98ab9f57-b9c9-49e9-ba24-82a96639232b",
+      "credentials": {
+        "slackApi": {
+          "id": "jn3h6moNGSLlBArE",
+          "name": "For Send Message"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "appCTHz3LrAdFvj2U",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblozp9Fnl55xpscu",
+          "mode": "id"
+        },
+        "triggerField": "Created Time",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -40
+      ],
+      "id": "c4eeb40b-71c7-4a85-b8cd-52699ab7f2c9",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "TMqEOmdo5ThT93nK",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"Email Subject\": \"example\",\n\t\"Email Body\": \"example\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        220
+      ],
+      "id": "ae3b9059-6a45-46c6-a90e-8e7157088d65",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        220
+      ],
+      "id": "9adfd56e-43cb-4070-af53-9a2f4c55e3a7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "AbmkfdOQlblYL0w6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        860,
+        280
+      ],
+      "id": "393b7a16-f066-4730-9e92-3f7a8016a5a8",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "AbmkfdOQlblYL0w6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject : {{ $('Edit Fields').item.json.Subject }}\nOriginal Email Body : {{ $('Edit Fields').item.json.Body }}\n\nHuman Feedback : {{ $json.data.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI Email Correction Agent assigned to refine and improve sales emails generated by GOALFRAME’s AI Sales Assistant. Your role is to review Human Feedback and apply appropriate corrections or improvements to the email content.\n\nPlease follow these steps:\n\n✅ Step 1: Understand the Feedback\nCarefully read and interpret the Human Feedback. Identify which parts of the email need to be changed, improved, or removed based on the reviewer’s comments (e.g., tone, structure, grammar, content relevance, clarity, etc.).\n\n\n📝 Step 2: Revise the Email\nApply corrections to the email accordingly. Ensure the updated version:\n\n- Maintains a friendly and professional tone\n\n- Aligns with the football content industry\n\n- Is clearly structured and free of formatting issues\n\n- Reflects the Human Feedback precisely\n\n\n🧠 Step 3: Confirm with Clarification\nAfter presenting the corrected email, always ask for confirmation, using a phrase such as:\n\n“Please let me know if this version looks good to you, or if there's anything else you'd like me to revise.”\n\n\nNote:\nIf the feedback is vague, politely ask for clarification before proceeding. Your goal is to deliver a polished, human-reviewed email that’s ready to be sent."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1100,
+        60
+      ],
+      "id": "6889d7a4-59f5-42b0-9f74-841709d1af56",
+      "name": "Correction Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"Email Subject\": \"example\",\n\t\"Email Body\": \"example\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1300,
+        280
+      ],
+      "id": "e0d3aca2-8079-4076-9e1c-9b3c1b953e92",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.data.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Approved",
+              "description": "=The generated email has been reviewed and approved by a human reviewer. It meets the required quality standards and is ready to be sent to the lead. Typical confirmation phrases include: \n\"Yes\",\n\"Approved\",\n\"Okay\",\n\"Ok\",\n\"Good\",\n\"Looks good\",\n\"Great\",\n\"Fine\",\n\"Perfect\",\n\"Go ahead\", or similar positive acknowledgments."
+            },
+            {
+              "category": "Denied",
+              "description": "=The generated email has been reviewed and rejected by a human reviewer. It does not meet the required quality or content standards and must be revised before sending. Common rejection phrases include: \n\"Add\",\n\"No\",\n\"Denied\",\n\"Not approved\",\n\"Needs changes\",\n\"Wrong tone\",\n\"Bad\",\n\"Incorrect\", or other negative feedback."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        680,
+        -40
+      ],
+      "id": "7fd2f028-8091-4d2a-9a48-a22526d508ed",
+      "name": "Approve or Not"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0e4a6249-a25e-4ed5-87e0-f507f904ac7b",
+              "name": "Subject",
+              "value": "={{ $json.output['Email Subject'] }}",
+              "type": "string"
+            },
+            {
+              "id": "3214230f-4493-4c23-87ea-720ab0abe505",
+              "name": "Body",
+              "value": "={{ $json.output['Email Body'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -40
+      ],
+      "id": "a11bb612-0fd7-49b9-8c65-59a2a30e08bc",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fromEmail": "yoib632@gmail.com",
+        "toEmail": "={{ $('Airtable Trigger').item.json.fields.Email }}",
+        "subject": "={{ $('Edit Fields').item.json.Subject }}",
+        "emailFormat": "text",
+        "text": "={{ $('Edit Fields').item.json.Body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1140,
+        -140
+      ],
+      "id": "09e0d49a-293d-48ae-8e49-4e64f72a6dc3",
+      "name": "Send Email",
+      "webhookId": "9d06b689-b583-4e5d-ac1c-4316e9546db4",
+      "credentials": {
+        "smtp": {
+          "id": "acH3kqlmo0gdZHtA",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack": {
+      "main": [
+        [
+          {
+            "node": "Approve or Not",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Approve or Not",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Correction Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correction Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Correction Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approve or Not": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Correction Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3a759d2a-6d64-4843-8e99-70a4df62b685",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1f679df01e7b48a7e705d738e81949fa963e9bde114f71c165ef28853d37dd6f"
+  },
+  "id": "y1qcctsYTyhHVEKA",
+  "tags": []
+}
