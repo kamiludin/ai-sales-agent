@@ -1,6 +1,7 @@
 # AI Sales Agent with n8n, Typeform, Airtable, and Slack
 
 Building an AI Sales Agent with Human-in-the-Loop Using n8n in Just a Few Minutes
+
 <img src="AI Sales Agent.jpg">
 
 ## Introduction
